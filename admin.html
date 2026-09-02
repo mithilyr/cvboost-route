@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07172b">
+<title>CV Boost Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --blue:#0867d8; --yellow:#ffd21c; --ink:#07172b; --ink2:#0d2440; --line:#1d3a56;
+  --txt:#e8eef6; --mute:#93a8c2;
+  --ok:#3ecf8e; --ok-bg:#0d2e1f;
+  --warn:#f0c04a; --warn-bg:#33280a;
+  --bad:#ff8a80; --bad-bg:#3a1512;
+  --mono:"Space Mono",ui-monospace,Menlo,monospace;
+  --body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --disp:"Archivo Black",Impact,var(--body);
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:#050f1c;color:var(--txt);font-family:var(--body);-webkit-font-smoothing:antialiased}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.wrap{max-width:1000px;margin:0 auto;padding:0 14px 70px}
+.view{display:none}.view.on{display:block}
+
+/* login */
+#login{max-width:400px;margin:0 auto;padding-top:16vh}
+.brand{font-family:var(--disp);font-size:38px;line-height:.9;text-transform:uppercase;letter-spacing:-.02em}
+.brand em{font-style:normal;color:var(--yellow)}
+.sub{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--mute);margin:9px 0 26px;text-transform:uppercase}
+label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:0 0 6px}
+input,select{width:100%;padding:13px;font-size:16px;border-radius:10px;border:2px solid var(--line);
+  background:var(--ink2);color:var(--txt);margin-bottom:14px;font-family:var(--body)}
+input:focus,select:focus{border-color:var(--blue);outline:none}
+.btn{padding:14px 18px;border:0;border-radius:10px;background:var(--yellow);color:var(--ink);
+     font-weight:800;font-size:16px;cursor:pointer}
+.btn.w{width:100%}
+.btn.g{background:transparent;color:var(--mute);border:2px solid var(--line);font-weight:600}
+.btn.sm{padding:9px 13px;font-size:14px}
+.err{background:var(--bad-bg);color:var(--bad);border-radius:9px;padding:11px 13px;font-size:14px;margin-bottom:12px;display:none}
+.err.on{display:block}
+
+/* chrome */
+header{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:18px}
+header h1{font-family:var(--disp);font-size:20px;text-transform:uppercase;letter-spacing:-.01em;margin:0;flex:1}
+header h1 em{font-style:normal;color:var(--yellow)}
+.tabs{display:flex;gap:7px;margin-bottom:18px;flex-wrap:wrap}
+.tab{padding:9px 14px;border-radius:9px;background:var(--ink2);border:1px solid var(--line);
+     color:var(--mute);font-size:14px;font-weight:600;cursor:pointer}
+.tab.on{background:var(--yellow);color:var(--ink);border-color:var(--yellow)}
+.panel{display:none}.panel.on{display:block}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+@media(min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:var(--ink2);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat .n{font-family:var(--disp);font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.stat .l{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-top:7px}
+.stat.ok .n{color:var(--ok)} .stat.warn .n{color:var(--warn)} .stat.bad .n{color:var(--bad)}
+
+h3{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:24px 0 10px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--ink2)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+thead th{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);background:#0a1c30}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{height:7px;border-radius:4px;background:#12293f;overflow:hidden;min-width:80px}
+.bar i{display:block;height:100%;background:var(--ok)}
+.pill{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;
+      text-transform:uppercase;padding:3px 8px;border-radius:20px}
+.p-ok{background:var(--ok-bg);color:var(--ok)}
+.p-warn{background:var(--warn-bg);color:var(--warn)}
+.p-bad{background:var(--bad-bg);color:var(--bad)}
+.p-mute{background:#16304c;color:var(--mute)}
+.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.row input,.row select{margin:0}
+.grow{flex:1;min-width:180px}
+
+/* plan editor */
+.planbox{background:#fffdf6;border-radius:12px;padding:12px}
+.planbox svg{width:100%;height:auto;display:block;touch-action:none}
+.hint{font-size:13.5px;color:var(--mute);margin:12px 0 0;line-height:1.55}
+.booth{cursor:grab}
+.booth.drag{cursor:grabbing}
+.savebar{display:flex;gap:9px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.saved{color:var(--ok);font-family:var(--mono);font-size:12px;display:none}
+.saved.on{display:inline}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ LOGIN ============ -->
+  <div class="view on" id="login">
+    <div class="brand">CV<em>Boost</em></div>
+    <div class="sub">Event Control · Admin</div>
+    <div class="err" id="lErr"></div>
+    <label for="em">Admin account</label>
+    <input id="em" type="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="admin@cvboost.lk">
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="••••••••">
+    <button class="btn w" id="go">Sign in</button>
+  </div>
+
+  <!-- ============ CONSOLE ============ -->
+  <div class="view" id="app">
+    <header>
+      <h1>CV<em>Boost</em> Control</h1>
+      <button class="btn g sm" id="refresh">Refresh</button>
+      <button class="btn g sm" id="out">Sign out</button>
+    </header>
+
+    <div class="tabs">
+      <div class="tab on" data-p="live">Live board</div>
+      <div class="tab" data-p="people">Delegates</div>
+      <div class="tab" data-p="plan">Floor plan</div>
+      <div class="tab" data-p="export">Export</div>
+    </div>
+
+    <!-- LIVE -->
+    <div class="panel on" id="p-live">
+      <div class="stats" id="stats"></div>
+      <h3>Progress by company</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Company</th><th>Booth</th><th class="num">Done</th><th class="num">Booked</th><th>Progress</th></tr></thead>
+          <tbody id="byco"></tbody>
+        </table>
+      </div>
+      <h3>Latest scans</h3>
+      <div class="scroll">
+        <table>
+          <thead><tr><th class="num">Time</th><th>Delegate</th><th>Company</th><th>Result</th></tr></thead>
+          <tbody id="recent"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PEOPLE -->
+    <div class="panel" id="p-people">
+      <div class="row" style="margin-bottom:12px">
+        <input class="grow" id="q" placeholder="Search name or ticket ID…">
+        <select id="filt" style="width:auto">
+          <option value="">All delegates</option>
+          <option value="none">Nothing recorded</option>
+          <option value="part">Partly done</option>
+          <option value="all">Fully done</option>
+        </select>
+      </div>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>Delegate</th><th class="num">Ticket</th><th class="num">Progress</th><th>Route</th><th></th></tr></thead>
+          <tbody id="people"></tbody>
+        </table>
+      </div>
+      <p class="hint">“Link” copies that delegate’s personal route URL — use it at the registration
+        desk for anyone who cannot look themselves up.</p>
+    </div>
+
+    <!-- PLAN -->
+    <div class="panel" id="p-plan">
+      <p class="hint" style="margin-bottom:12px">Drag anything — company booths, the two doors, the
+        registration desk, the CV clinic, the corridor — to where it actually sits, then save.
+        Every delegate’s floor plan updates immediately.</p>
+      <div class="planbox"><svg id="plan" viewBox="0 0 100 80"></svg></div>
+      <div class="savebar">
+        <button class="btn sm" id="savePlan">Save layout</button>
+        <button class="btn g sm" id="resetPlan">Undo changes</button>
+        <span class="saved" id="savedMsg">Saved · delegate pages updated</span>
+      </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="panel" id="p-export">
+      <h3>Download</h3>
+      <div class="row">
+        <button class="btn sm" id="csvAtt">Attendance CSV</button>
+        <button class="btn sm" id="csvLinks">Delegate links CSV</button>
+        <button class="btn sm" id="csvLog">Scan log CSV</button>
+      </div>
+      <p class="hint">Take an attendance export at each break. It is the backup that matters if
+        anything goes wrong mid-event.<br><br>
+        The links CSV has every delegate’s name, email, phone and personal route URL — that is
+        your WhatsApp or mail-merge source.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL = "https://rswgwgngcdssgectvrue.supabase.co";
+const SUPABASE_KEY = "sb_publishable_FHT1JEwdxaiWmJJLUVtR3w_H8HaEIzA";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth:{ persistSession:true } });
+const $ = id => document.getElementById(id);
+const esc = s => String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+let COMPANIES = [], FIXTURES = [], PEOPLE = [], DIRTY = false, poll = null;
+
+/* ---------------- auth ---------------- */
+$('go').onclick = async () => {
+  $('lErr').classList.remove('on');
+  const { error } = await sb.auth.signInWithPassword({ email:$('em').value.trim(), password:$('pw').value });
+  if (error){ $('lErr').textContent = error.message; $('lErr').classList.add('on'); return; }
+  boot();
+};
+$('pw').addEventListener('keydown', e => { if(e.key==='Enter') $('go').click(); });
+$('out').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+$('refresh').onclick = () => loadAll();
+
+async function boot(){
+  const { data: { user } } = await sb.auth.getUser();
+  // an admin can see every profile row, so this MUST be scoped to the signed-in user
+  const { data: prof } = await sb.from('profiles').select('role').eq('id', user.id).maybeSingle();
+  if (!prof || prof.role !== 'admin'){
+    $('lErr').textContent = "That account is not an admin."; $('lErr').classList.add('on');
+    await sb.auth.signOut(); return;
+  }
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id==='app'));
+  await loadAll();
+  clearInterval(poll);
+  poll = setInterval(() => { if ($('p-live').classList.contains('on')) loadLive(); }, 20000);
+}
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x===t));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on', p.id === 'p'+'-'+t.dataset.p));
+  if (t.dataset.p === 'plan') drawPlan();
+});
+
+/* ---------------- data ---------------- */
+async function loadAll(){ await loadCompanies(); await Promise.all([loadLive(), loadPeople()]); }
+
+async function loadCompanies(){
+  const [{ data: cos }, { data: fx }] = await Promise.all([
+    sb.from('companies').select('*').order('sort_order'),
+    sb.from('floor_fixtures').select('*').order('sort_order')
+  ]);
+  COMPANIES = cos || [];
+  FIXTURES  = fx  || [];
+}
+
+async function loadLive(){
+  const { data: s } = await sb.rpc('admin_stats');
+  if (!s) return;
+  $('stats').innerHTML = [
+    ['delegates','Delegates',''], ['checked_in','Checked in','ok'],
+    ['visits_total','Visits booked',''],
+    ['valid','On time','ok'], ['early','Early','warn'], ['late','Late','warn'],
+    ['missed','Missed','bad'], ['rejected_scans','Rejected scans','bad']
+  ].map(([k,l,c]) => `<div class="stat ${c}"><div class="n">${s[k] ?? 0}</div><div class="l">${l}</div></div>`).join('');
+
+  $('byco').innerHTML = (s.by_company||[]).map(c => {
+    const pct = c.scheduled ? Math.round(100*c.done/c.scheduled) : 0;
+    return `<tr><td><b>${esc(c.company)}</b></td><td class="num">${esc(c.booth||'')}</td>
+      <td class="num">${c.done}</td><td class="num">${c.scheduled}</td>
+      <td><div class="bar"><i style="width:${pct}%"></i></div></td></tr>`;
+  }).join('') || `<tr><td colspan="5" style="color:var(--mute)">No companies</td></tr>`;
+
+  const { data: log } = await sb.from('scan_log')
+    .select('at,result,detail,participants(full_name,ticket_id),companies(name)')
+    .order('at',{ascending:false}).limit(15);
+  const TONE = { VALID:'p-ok', OVERRIDE:'p-ok', EARLY:'p-warn', LATE:'p-warn',
+                 DUPLICATE:'p-warn', WRONG_COMPANY:'p-bad', NOT_FOUND:'p-bad', CANCELLED:'p-mute' };
+  $('recent').innerHTML = (log||[]).map(r => `<tr>
+      <td class="num">${new Date(r.at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</td>
+      <td>${esc(r.participants?.full_name || '—')}</td>
+      <td>${esc(r.companies?.name || '—')}</td>
+      <td><span class="pill ${TONE[r.result]||'p-mute'}">${esc(r.result)}</span></td></tr>`).join('')
+    || `<tr><td colspan="4" style="color:var(--mute)">No scans yet</td></tr>`;
+}
+
+async function loadPeople(){
+  const { data } = await sb.from('participants')
+    .select('id,ticket_id,full_name,email,phone,token,cancelled,visits(route_sequence,status,scheduled_start,companies(name,booth_label))')
+    .order('ticket_id');
+  PEOPLE = data || [];
+  paintPeople();
+}
+
+const DONE = ['VALID','EARLY','LATE','OVERRIDE'];
+function paintPeople(){
+  const q = $('q').value.trim().toLowerCase(), f = $('filt').value;
+  const rows = PEOPLE.filter(p => {
+    if (q && !(p.full_name.toLowerCase().includes(q) || p.ticket_id.toLowerCase().includes(q))) return false;
+    const d = (p.visits||[]).filter(v=>DONE.includes(v.status)).length, t = (p.visits||[]).length;
+    if (f==='none' && d!==0) return false;
+    if (f==='all'  && (t===0 || d!==t)) return false;
+    if (f==='part' && !(d>0 && d<t)) return false;
+    return true;
+  });
+  $('people').innerHTML = rows.map(p => {
+    const vs = (p.visits||[]).slice().sort((a,b)=>a.route_sequence-b.route_sequence);
+    const d = vs.filter(v=>DONE.includes(v.status)).length;
+    const route = vs.map(v => {
+      const ok = DONE.includes(v.status);
+      return `<span class="pill ${ok?'p-ok':'p-mute'}" title="${esc(v.status)}">${v.route_sequence} ${esc(v.companies?.name||'')}</span>`;
+    }).join(' ');
+    return `<tr><td><b>${esc(p.full_name)}</b>${p.cancelled?' <span class="pill p-bad">Cancelled</span>':''}</td>
+      <td class="num">${esc(p.ticket_id)}</td>
+      <td class="num">${d}/${vs.length}</td>
+      <td>${route}</td>
+      <td><button class="btn g sm" data-tok="${esc(p.token)}">Link</button></td></tr>`;
+  }).join('') || `<tr><td colspan="5" style="color:var(--mute)">No matches</td></tr>`;
+
+  $('people').querySelectorAll('button[data-tok]').forEach(b => b.onclick = () => {
+    const url = routeUrl(b.dataset.tok);
+    navigator.clipboard?.writeText(url).then(
+      () => { b.textContent = 'Copied'; setTimeout(()=>b.textContent='Link',1400); },
+      () => prompt("Copy this link:", url));
+  });
+}
+$('q').oninput = paintPeople; $('filt').onchange = paintPeople;
+const routeUrl = tok => location.origin + location.pathname.replace(/admin\.html$/,'route.html') + "?t=" + tok;
+
+/* ---------------- floor plan editor ---------------- */
+const ROOM = { x:5, y:4, w:90, h:52 };
+const PLAN_H = 80;
+const N = "http://www.w3.org/2000/svg";
+const el = (t,a,txt) => { const e = document.createElementNS(N,t);
+  for (const k in a) e.setAttribute(k,a[k]); if (txt!=null) e.textContent = txt; return e; };
+
+function fixtureNode(f){
+  const g = el('g',{class:'booth','data-fx':f.key});
+  const fill = f.kind==='door' ? '#ffd21c' : f.kind==='open' ? '#efece2' : '#e8e2d2';
+  g.appendChild(el('rect',{x:f.x,y:f.y,width:f.w,height:f.h,rx:1.8,fill,
+    stroke: f.kind==='open' ? '#b9b3a2' : '#07172b',
+    'stroke-width': f.kind==='open'?.5:.6,
+    'stroke-dasharray': f.kind==='open'?'2 1.6':'none'}));
+  // zone labels sit top-left so a big zone never hides the desk drawn on top of it
+  const zone = f.kind === 'open';
+  const cx = zone ? Number(f.x)+2.5 : Number(f.x)+Number(f.w)/2;
+  const cy = zone ? Number(f.y)+3.8 : Number(f.y)+Number(f.h)/2+1.1;
+  const fs = zone ? 2.5 : Math.min(2.7, (f.w*1.7)/Math.max(f.label.length,1));
+  const t = el('text',{x:cx,y:cy,'text-anchor': zone?'start':'middle','font-size':fs,
+    'font-family':'Space Mono, monospace',fill:zone?'#8a8577':'#07172b'},f.label);
+  if (f.rot) t.setAttribute('transform',`rotate(-90 ${cx} ${cy-1.1})`);
+  g.appendChild(t);
+  return g;
+}
+
+function drawPlan(){
+  const svg = $('plan'); svg.innerHTML = '';
+  const outside = f => f.kind === 'open' && Number(f.y) > ROOM.y + ROOM.h;
+
+  // zones outside the hall (the corridor) render behind the hall outline
+  for (const f of FIXTURES.filter(outside)) svg.appendChild(fixtureNode(f));
+
+  svg.appendChild(el('rect',{x:ROOM.x,y:ROOM.y,width:ROOM.w,height:ROOM.h,rx:2,
+    fill:'#faf7ef',stroke:'#07172b','stroke-width':.8}));
+  svg.appendChild(el('text',{x:50,y:ROOM.y-1.4,'text-anchor':'middle','font-size':3,
+    'font-family':'Space Mono, monospace',fill:'#5d6b7e'},'HALL LT201'));
+
+  for (const f of FIXTURES.filter(f => !outside(f))) svg.appendChild(fixtureNode(f));
+
+  for (const c of COMPANIES){
+    const w=17,h=13,x=Number(c.floor_x)-w/2,y=Number(c.floor_y)-h/2;
+    const g = el('g',{class:'booth','data-code':c.code});
+    g.appendChild(el('rect',{x,y,width:w,height:h,rx:2,
+      fill: c.active ? '#0867d8' : '#c9c3b2', stroke:'#07172b','stroke-width':.9}));
+    g.appendChild(el('text',{x:Number(c.floor_x),y:Number(c.floor_y)+.6,'text-anchor':'middle',
+      'font-size':3.1,'font-family':'Inter, sans-serif','font-weight':'800',fill:'#fff'},c.name));
+    g.appendChild(el('text',{x:Number(c.floor_x),y:Number(c.floor_y)+4.4,'text-anchor':'middle',
+      'font-size':2.4,'font-family':'Space Mono, monospace',fill:'rgba(255,255,255,.85)'},c.booth_label||''));
+    svg.appendChild(g);
+  }
+  wireDrag(svg);
+}
+
+let dragWired = false;
+function wireDrag(svg){
+  // drawPlan() runs on every tab switch and reload; without this guard each run
+  // stacked another set of listeners on the same node, so one mousedown fired
+  // many handlers and a single drag threw several booths to their clamp limits.
+  if (dragWired) return;
+  dragWired = true;
+  let cur = null, off = {x:0,y:0};
+  const clamp = (v,lo,hi) => Math.max(lo, Math.min(hi, v));
+  const pt = e => {
+    const r = svg.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX-r.left)/r.width*100, y: (src.clientY-r.top)/r.height*PLAN_H };
+  };
+  const down = e => {
+    const g = e.target.closest('.booth'); if (!g) return;
+    e.preventDefault();
+    cur = g; g.classList.add('drag');
+    const p = pt(e);
+    if (g.dataset.fx){
+      const f = FIXTURES.find(f=>f.key===g.dataset.fx);
+      off = { x: p.x-Number(f.x), y: p.y-Number(f.y) };
+    } else {
+      const c = COMPANIES.find(c=>c.code===g.dataset.code);
+      off = { x: p.x-Number(c.floor_x), y: p.y-Number(c.floor_y) };
+    }
+  };
+  const move = e => {
+    if (!cur) return;
+    e.preventDefault();
+    const p = pt(e);
+    DIRTY = true; $('savedMsg').classList.remove('on');
+
+    if (cur.dataset.fx){                       // doors, desks, zones
+      const f = FIXTURES.find(f=>f.key===cur.dataset.fx);
+      f.x = clamp(p.x-off.x, 0, 100-Number(f.w)).toFixed(1);
+      f.y = clamp(p.y-off.y, 0, PLAN_H-Number(f.h)).toFixed(1);
+      const [rect,t] = cur.children;
+      rect.setAttribute('x', f.x); rect.setAttribute('y', f.y);
+      const cx = Number(f.x)+Number(f.w)/2, cy = Number(f.y)+Number(f.h)/2+1.1;
+      t.setAttribute('x', cx); t.setAttribute('y', cy);
+      if (f.rot) t.setAttribute('transform', `rotate(-90 ${cx} ${cy-1.1})`);
+    } else {                                   // company booths stay inside the hall
+      const c = COMPANIES.find(c=>c.code===cur.dataset.code);
+      c.floor_x = clamp(p.x-off.x, ROOM.x+9, ROOM.x+ROOM.w-9).toFixed(1);
+      c.floor_y = clamp(p.y-off.y, ROOM.y+7, ROOM.y+ROOM.h-7).toFixed(1);
+      const [rect,t1,t2] = cur.children;
+      rect.setAttribute('x', Number(c.floor_x)-8.5); rect.setAttribute('y', Number(c.floor_y)-6.5);
+      t1.setAttribute('x', c.floor_x); t1.setAttribute('y', Number(c.floor_y)+.6);
+      t2.setAttribute('x', c.floor_x); t2.setAttribute('y', Number(c.floor_y)+4.4);
+    }
+  };
+  const up = () => { if (cur){ cur.classList.remove('drag'); cur = null; } };
+  svg.addEventListener('mousedown',down); svg.addEventListener('touchstart',down,{passive:false});
+  window.addEventListener('mousemove',move); window.addEventListener('touchmove',move,{passive:false});
+  window.addEventListener('mouseup',up);     window.addEventListener('touchend',up);
+}
+
+$('savePlan').onclick = async () => {
+  $('savePlan').disabled = true; $('savePlan').textContent = 'Saving…';
+  try{
+    for (const c of COMPANIES){
+      const { error } = await sb.from('companies')
+        .update({ floor_x:Number(c.floor_x), floor_y:Number(c.floor_y) }).eq('id', c.id);
+      if (error) throw error;
+    }
+    for (const f of FIXTURES){
+      const { error } = await sb.from('floor_fixtures')
+        .update({ x:Number(f.x), y:Number(f.y) }).eq('id', f.id);
+      if (error) throw error;
+    }
+    DIRTY = false; $('savedMsg').classList.add('on');
+  } catch(e){ alert("Could not save: " + e.message); }
+  finally { $('savePlan').disabled = false; $('savePlan').textContent = 'Save layout'; }
+};
+$('resetPlan').onclick = async () => { await loadCompanies(); DIRTY=false; drawPlan(); };
+window.addEventListener('beforeunload', e => { if (DIRTY){ e.preventDefault(); e.returnValue=''; } });
+
+/* ---------------- exports ---------------- */
+function download(name, rows){
+  const csv = rows.map(r => r.map(v => {
+    const s = v==null ? '' : String(v);
+    return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+  }).join(',')).join('\r\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(["﻿"+csv], {type:'text/csv;charset=utf-8'}));
+  a.download = name; a.click(); URL.revokeObjectURL(a.href);
+}
+const hhmm = t => t ? new Date(t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '';
+
+$('csvAtt').onclick = async () => {
+  const { data } = await sb.from('visits')
+    .select('route_sequence,status,scheduled_start,scheduled_end,actual_scan_time,override_reason,participants(ticket_id,full_name,university),companies(name,booth_label)')
+    .order('scheduled_start');
+  const rows = [['Ticket','Name','University','Seq','Company','Booth','Slot start','Slot end','Scanned','Status','Override reason']];
+  for (const v of (data||[])) rows.push([
+    v.participants?.ticket_id, v.participants?.full_name, v.participants?.university,
+    v.route_sequence, v.companies?.name, v.companies?.booth_label,
+    hhmm(v.scheduled_start), hhmm(v.scheduled_end), hhmm(v.actual_scan_time),
+    v.status, v.override_reason]);
+  download('cvboost-attendance.csv', rows);
+};
+$('csvLinks').onclick = () => {
+  const rows = [['Ticket','Name','Email','Phone','Visits','Route link']];
+  for (const p of PEOPLE) rows.push([p.ticket_id, p.full_name, p.email, p.phone,
+    (p.visits||[]).length, routeUrl(p.token)]);
+  download('cvboost-delegate-links.csv', rows);
+};
+$('csvLog').onclick = async () => {
+  const { data } = await sb.from('scan_log')
+    .select('at,result,detail,token_tried,participants(ticket_id,full_name),companies(name)')
+    .order('at');
+  const rows = [['Time','Ticket','Name','Company','Result','Detail']];
+  for (const r of (data||[])) rows.push([new Date(r.at).toISOString(),
+    r.participants?.ticket_id, r.participants?.full_name, r.companies?.name, r.result, r.detail]);
+  download('cvboost-scan-log.csv', rows);
+};
+
+sb.auth.getSession().then(({data}) => { if (data.session) boot(); });
+</script>
+</body>
+</html>

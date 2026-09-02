@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#07172b">
+<title>CV Boost Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
+<style>
+:root{
+  --blue:#0867d8; --yellow:#ffd21c; --ink:#07172b; --ink2:#0e2540; --paper:#f4f0e5;
+  --ok:#12a150; --ok-d:#0a6c35;
+  --warn:#e08600; --warn-d:#9a5c00;
+  --bad:#d03027; --bad-d:#8f1d17;
+  --info:#2b6fd6;
+  --line:#1d3a56;
+  --mono:"Space Mono",ui-monospace,Menlo,monospace;
+  --body:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --disp:"Archivo Black",Impact,var(--body);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--ink);color:#eaf1f9;font-family:var(--body);
+  -webkit-font-smoothing:antialiased;overscroll-behavior:none;
+  padding-env:0;
+}
+button{font-family:inherit}
+:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.view{display:none;min-height:100dvh;flex-direction:column}
+.view.on{display:flex}
+
+/* ---------- login ---------- */
+#login{justify-content:center;padding:28px 22px;gap:0}
+.brand{font-family:var(--disp);font-size:40px;line-height:.9;letter-spacing:-.02em;text-transform:uppercase}
+.brand em{font-style:normal;color:var(--yellow)}
+.sub{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:#8fa8c4;margin:10px 0 30px;text-transform:uppercase}
+label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8fa8c4;margin:0 0 6px}
+input{
+  width:100%;padding:15px 14px;font-size:17px;border-radius:11px;border:2px solid #24425f;
+  background:var(--ink2);color:#eaf1f9;margin-bottom:16px;font-family:var(--body);
+}
+input:focus{border-color:var(--blue);outline:none}
+.btn{
+  width:100%;padding:17px;border:0;border-radius:11px;background:var(--yellow);color:var(--ink);
+  font-weight:800;font-size:17px;letter-spacing:-.01em;cursor:pointer;
+}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:#8fa8c4;border:2px solid #24425f;font-weight:600}
+.btn.sm{padding:13px;font-size:15px}
+.err{background:#3a1512;color:#ffb4ad;border-radius:9px;padding:11px 13px;font-size:14px;margin-bottom:14px;display:none}
+.err.on{display:block}
+
+/* ---------- scan ---------- */
+#scan{background:#050f1c}
+header{
+  display:flex;align-items:center;gap:10px;padding:12px 14px;
+  padding-top:calc(12px + env(safe-area-inset-top));
+  background:var(--ink);border-bottom:3px solid var(--yellow);position:sticky;top:0;z-index:5
+}
+header .co{flex:1;min-width:0}
+header .co b{display:block;font-family:var(--disp);font-size:17px;letter-spacing:-.01em;text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header .co span{font-family:var(--mono);font-size:10px;color:var(--yellow);letter-spacing:.1em}
+.iconbtn{background:#16304c;border:0;color:#c3d5e8;border-radius:9px;width:40px;height:40px;font-size:17px;cursor:pointer}
+
+#reader{width:100%;background:#000;position:relative;min-height:260px}
+#reader video{width:100%!important;display:block}
+#camhint{padding:26px 20px;text-align:center;color:#8fa8c4;font-size:14px}
+
+.pad{padding:14px}
+.row{display:flex;gap:9px}
+.row input{margin:0;flex:1}
+.queue{
+  display:none;margin:0 14px 12px;padding:10px 13px;border-radius:9px;
+  background:#33280a;color:var(--yellow);font-family:var(--mono);font-size:12px
+}
+.queue.on{display:block}
+h4{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#6d84a0;margin:16px 14px 8px}
+.log{list-style:none;margin:0;padding:0 14px 40px}
+.log li{
+  display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #16304c;font-size:14px
+}
+.log .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.log .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log .tm{font-family:var(--mono);font-size:11px;color:#6d84a0}
+
+/* ---------- result overlay ---------- */
+#result{
+  position:fixed;inset:0;z-index:50;display:none;flex-direction:column;
+  padding:26px 22px calc(22px + env(safe-area-inset-bottom));justify-content:center;text-align:center
+}
+#result.on{display:flex}
+#result .tag{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;opacity:.85}
+#result .big{font-family:var(--disp);font-size:clamp(34px,11vw,58px);line-height:.92;text-transform:uppercase;margin:8px 0 4px;letter-spacing:-.02em}
+#result .who{font-size:clamp(20px,6vw,28px);font-weight:800;margin:16px 0 2px;line-height:1.15}
+#result .meta{font-family:var(--mono);font-size:14px;opacity:.9;margin-top:6px}
+#result .det{font-size:15px;margin-top:14px;opacity:.95;font-weight:500}
+#result .where{
+  margin-top:18px;padding:13px;border-radius:11px;background:rgba(0,0,0,.28);
+  font-size:15px;font-weight:600
+}
+#result .acts{margin-top:26px;display:flex;flex-direction:column;gap:10px}
+#result .acts .btn{background:rgba(0,0,0,.3);color:#fff;border:2px solid rgba(255,255,255,.5)}
+#result .acts .btn.pri{background:#fff;color:var(--ink);border-color:#fff}
+.r-ok{background:var(--ok)}.r-warn{background:var(--warn)}.r-bad{background:var(--bad)}
+.r-info{background:var(--info)}.r-mute{background:#41546b}
+#result.r-warn,#result.r-ok,#result.r-bad,#result.r-info,#result.r-mute{color:#fff}
+.tapoff{position:absolute;inset:0;z-index:-1}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div class="view on" id="login">
+  <div class="brand">CV<em>Boost</em></div>
+  <div class="sub">Station Scanner · 4 Sep 2026</div>
+  <div class="err" id="loginErr"></div>
+  <label for="em">Station account</label>
+  <input id="em" type="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="wso2a@cvboost.lk">
+  <label for="pw">Password</label>
+  <input id="pw" type="password" autocomplete="current-password" placeholder="••••••••">
+  <button class="btn" id="goLogin">Sign in</button>
+</div>
+
+<!-- ============ SCANNER ============ -->
+<div class="view" id="scan">
+  <header>
+    <div class="co"><b id="coName">—</b><span id="coBooth"></span></div>
+    <button class="iconbtn" id="btnTorch" title="Torch" hidden>🔦</button>
+    <button class="iconbtn" id="btnOut" title="Sign out">⏻</button>
+  </header>
+
+  <div id="reader"></div>
+  <div id="camhint">Starting camera…</div>
+
+  <div class="queue" id="queue"></div>
+
+  <div class="pad">
+    <div class="row">
+      <input id="manual" placeholder="Ticket ID e.g. CV_007" autocapitalize="characters" autocomplete="off" spellcheck="false">
+      <button class="btn sm" id="goManual" style="width:auto;padding-left:20px;padding-right:20px">Go</button>
+    </div>
+  </div>
+
+  <h4>Recent scans</h4>
+  <ul class="log" id="log"></ul>
+</div>
+
+<!-- ============ RESULT ============ -->
+<div id="result">
+  <div class="tapoff" id="tapoff"></div>
+  <div class="tag" id="rTag"></div>
+  <div class="big" id="rBig"></div>
+  <div class="who" id="rWho"></div>
+  <div class="meta" id="rMeta"></div>
+  <div class="det" id="rDet"></div>
+  <div class="where" id="rWhere" hidden></div>
+  <div class="acts" id="rActs"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+/* ============================================================
+   CV Boost station scanner
+   The scanning company is derived server-side from the session.
+   Nothing here is trusted for authorisation.
+   ============================================================ */
+const SUPABASE_URL = "https://rswgwgngcdssgectvrue.supabase.co";
+const SUPABASE_KEY = "sb_publishable_FHT1JEwdxaiWmJJLUVtR3w_H8HaEIzA";
+const QUEUE_KEY    = "cvboost.queue.v1";
+const TOKEN_RE     = /CB26-[0-9A-HJKMNP-TV-Z]{10}/i;
+
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true }
+});
+
+const $  = id => document.getElementById(id);
+const show = id => document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === id));
+
+let qr = null, scanning = false, lastTok = "", lastAt = 0, holdTimer = null;
+
+/* ---------------- offline queue ---------------- */
+const queue = {
+  all:  () => { try { return JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]"); } catch { return []; } },
+  save: q  => { try { localStorage.setItem(QUEUE_KEY, JSON.stringify(q)); } catch {} },
+  add:  it => { const q = queue.all(); q.push(it); queue.save(q); queue.paint(); },
+  paint(){
+    const n = queue.all().length, el = $('queue');
+    el.classList.toggle('on', n > 0);
+    el.textContent = n ? `${n} scan${n>1?'s':''} waiting to sync — they will send automatically` : '';
+  },
+  async flush(){
+    let q = queue.all(); if (!q.length) return;
+    const left = [];
+    for (const it of q) {
+      try {
+        const { error } = await sb.rpc('record_scan', {
+          p_token: it.token, p_idempotency_key: it.key, p_user_agent: navigator.userAgent
+        });
+        if (error) throw error;
+      } catch { left.push(it); }
+    }
+    queue.save(left); queue.paint();
+  }
+};
+
+/* ---------------- auth ---------------- */
+async function loadProfile(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if (!user) return null;
+  // scope to the signed-in user: an admin session can read every profile row,
+  // and picking an arbitrary one would bind this phone to the wrong booth
+  const { data, error } = await sb
+    .from('profiles')
+    .select('display_name, role, booth, companies(name, booth_label)')
+    .eq('id', user.id).maybeSingle();
+  if (error || !data) return null;
+  return data;
+}
+
+async function afterLogin(){
+  const p = await loadProfile();
+  if (!p) { fail("Could not load this account's station."); await sb.auth.signOut(); return; }
+  if (p.role !== 'station') {
+    fail(`This is a ${p.role} account and cannot scan. Use a station login.`);
+    await sb.auth.signOut(); return;
+  }
+  $('coName').textContent  = p.companies ? p.companies.name : '—';
+  $('coBooth').textContent = (p.companies?.booth_label || '') + (p.booth > 1 ? ` · REP ${p.booth}` : '');
+  show('scan');
+  queue.paint(); queue.flush();
+  startCamera();
+}
+
+function fail(msg){ const e = $('loginErr'); e.textContent = msg; e.classList.add('on'); }
+
+$('goLogin').onclick = async () => {
+  $('loginErr').classList.remove('on');
+  const email = $('em').value.trim(), password = $('pw').value;
+  if (!email || !password) return fail("Enter the station account and password.");
+  $('goLogin').textContent = "Signing in…"; $('goLogin').disabled = true;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  $('goLogin').textContent = "Sign in"; $('goLogin').disabled = false;
+  if (error) return fail(error.message);
+  afterLogin();
+};
+$('pw').addEventListener('keydown', e => { if (e.key === 'Enter') $('goLogin').click(); });
+
+$('btnOut').onclick = async () => {
+  if (queue.all().length && !confirm("There are unsent scans. Sign out anyway?")) return;
+  await stopCamera(); await sb.auth.signOut(); location.reload();
+};
+
+/* ---------------- camera ---------------- */
+async function startCamera(){
+  if (scanning) return;
+  try {
+    qr = new Html5Qrcode("reader", { verbose:false });
+    await qr.start(
+      { facingMode: "environment" },
+      { fps: 12, qrbox: { width: 240, height: 240 }, aspectRatio: 1.0 },
+      onDecode,
+      () => {}
+    );
+    scanning = true;
+    $('camhint').style.display = 'none';
+  } catch (e) {
+    $('camhint').innerHTML =
+      "Camera unavailable — use the ticket ID box below.<br><small>" +
+      String(e.message || e).replace(/[<>]/g,'') + "</small>";
+  }
+}
+async function stopCamera(){
+  if (qr && scanning) { try { await qr.stop(); } catch {} }
+  scanning = false;
+}
+
+function onDecode(text){
+  const m = TOKEN_RE.exec(text || "");
+  const tok = m ? m[0].toUpperCase() : (text || "").trim();
+  if (!tok) return;
+  const now = Date.now();
+  if (tok === lastTok && now - lastAt < 4000) return;   // ignore camera re-reads
+  lastTok = tok; lastAt = now;
+  submit(tok);
+}
+
+/* ---------------- scanning ---------------- */
+$('goManual').onclick = () => {
+  const v = $('manual').value.trim();
+  if (!v) return;
+  $('manual').value = '';
+  submit(v.toUpperCase());
+};
+$('manual').addEventListener('keydown', e => { if (e.key === 'Enter') $('goManual').click(); });
+
+function uuid(){
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c/4).toString(16));
+}
+
+async function submit(token){
+  const key = uuid();
+  try {
+    const { data, error } = await sb.rpc('record_scan', {
+      p_token: token, p_idempotency_key: key, p_user_agent: navigator.userAgent
+    });
+    if (error) throw error;
+    render(data);
+  } catch (e) {
+    const offline = !navigator.onLine || /fetch|network|Failed to fetch/i.test(e.message || "");
+    if (offline) {
+      queue.add({ token, key, at: Date.now() });
+      render({ result:"QUEUED", detail:"Saved on this phone. It will send when the signal returns.",
+               participant:null, visit:null, at:clock() });
+    } else {
+      render({ result:"ERROR", detail: e.message || "Something went wrong.",
+               participant:null, visit:null, at:clock() });
+    }
+  }
+}
+
+const clock = () => new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+const TONE = {
+  VALID:'r-ok', OVERRIDE:'r-info',
+  EARLY:'r-warn', LATE:'r-warn', DUPLICATE:'r-warn', QUEUED:'r-warn',
+  WRONG_COMPANY:'r-bad', NOT_FOUND:'r-bad', ERROR:'r-bad',
+  CANCELLED:'r-mute', SCANNING_DISABLED:'r-mute'
+};
+const HEAD = {
+  VALID:'Valid visit', OVERRIDE:'Recorded', EARLY:'Early', LATE:'Late',
+  DUPLICATE:'Already done', WRONG_COMPANY:'Wrong booth', NOT_FOUND:'Not found',
+  CANCELLED:'Cancelled', QUEUED:'Saved offline', ERROR:'Error',
+  SCANNING_DISABLED:'Paused'
+};
+
+function render(r){
+  clearTimeout(holdTimer);
+  const box = $('result');
+  box.className = 'on ' + (TONE[r.result] || 'r-mute');
+
+  $('rTag').textContent = r.company ? `${r.company.name}${r.company.booth ? ' · ' + r.company.booth : ''}` : 'CV Boost';
+  $('rBig').textContent = HEAD[r.result] || r.result;
+  $('rWho').textContent = r.participant ? r.participant.name : '';
+  $('rMeta').textContent = r.visit
+    ? `${r.visit.start}–${r.visit.end}  ·  visit ${r.visit.sequence} of ${r.visit.total}  ·  ${r.at}`
+    : (r.at || '');
+  $('rDet').textContent = r.detail || '';
+
+  const w = $('rWhere');
+  if (r.should_be_at) {
+    w.hidden = false;
+    w.textContent = `Send them to ${r.should_be_at.company} · ${r.should_be_at.booth} (${r.should_be_at.start}–${r.should_be_at.end})`;
+  } else w.hidden = true;
+
+  const acts = $('rActs'); acts.innerHTML = '';
+  if (r.result === 'WRONG_COMPANY' && r.participant) {
+    const b = document.createElement('button');
+    b.className = 'btn'; b.textContent = 'Record anyway (walk-in)';
+    b.onclick = () => walkIn(r.participant.ticket);
+    acts.appendChild(b);
+  }
+  const nxt = document.createElement('button');
+  nxt.className = 'btn pri'; nxt.textContent = 'Next delegate';
+  nxt.onclick = dismiss;
+  acts.appendChild(nxt);
+
+  if (r.participant) addLog(r);
+
+  // green results clear themselves; anything needing a decision waits for a tap
+  if (r.result === 'VALID' || r.result === 'OVERRIDE') holdTimer = setTimeout(dismiss, 2200);
+}
+
+$('tapoff').onclick = dismiss;
+function dismiss(){ clearTimeout(holdTimer); $('result').className = ''; }
+
+async function walkIn(ticket){
+  const reason = prompt("Reason for the walk-in:", "Booth free — delegate walked up");
+  if (reason === null) return;
+  try {
+    const { data, error } = await sb.rpc('record_walk_in', { p_token: ticket, p_reason: reason });
+    if (error) throw error;
+    render({ ...data, at: clock() });
+  } catch (e) {
+    render({ result:'ERROR', detail: e.message, at: clock() });
+  }
+}
+
+function addLog(r){
+  const li = document.createElement('li');
+  const dot = document.createElement('span');
+  dot.className = 'dot ' + (TONE[r.result] || 'r-mute');
+  const nm = document.createElement('span');
+  nm.className = 'nm';
+  nm.textContent = `${r.participant.name} · ${r.participant.ticket}`;
+  const tm = document.createElement('span');
+  tm.className = 'tm'; tm.textContent = (r.at || '').slice(0,5);
+  li.append(dot, nm, tm);
+  const log = $('log');
+  log.prepend(li);
+  while (log.children.length > 8) log.lastChild.remove();
+}
+
+/* ---------------- lifecycle ---------------- */
+window.addEventListener('online',  () => queue.flush());
+setInterval(() => { if (navigator.onLine) queue.flush(); }, 20000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && navigator.onLine) queue.flush();
+});
+
+sb.auth.getSession().then(({ data }) => { if (data.session) afterLogin(); });
+</script>
+</body>
+</html>

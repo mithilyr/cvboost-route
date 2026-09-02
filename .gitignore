@@ -1,0 +1,14 @@
+# Never commit delegate data. Names, phones, emails and schedules
+# belong in Supabase only, never in this repository.
+*.csv
+*.xlsx
+*.json
+!package.json
+
+# local
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/
+*.log
